@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/fit/
+data/cache/
+data/exports/
+.garminconnect/
+.playwright-cli/
+debug-metrics.json
+*.fit
+*.parquet
+.DS_Store

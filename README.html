@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>garmin-ai README</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f8fa;
+      --paper: #ffffff;
+      --text: #182026;
+      --muted: #5f6b76;
+      --border: #d8dee6;
+      --accent: #0b6bcb;
+      --code-bg: #f1f4f8;
+      --table-head: #edf3f9;
+      --shadow: 0 18px 45px rgba(24, 32, 38, 0.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #11161c;
+        --paper: #18212a;
+        --text: #e7edf3;
+        --muted: #a7b2be;
+        --border: #2f3a46;
+        --accent: #77b7ff;
+        --code-bg: #101820;
+        --table-head: #202c37;
+        --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.65;
+    }
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 32px auto;
+      padding: 42px min(56px, 5vw);
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin: 1.55em 0 0.6em;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    h1 { margin-top: 0; font-size: 2.25rem; }
+    h2 { padding-top: 0.35em; border-top: 1px solid var(--border); font-size: 1.55rem; }
+    h3 { font-size: 1.2rem; }
+    p, ul, ol { margin: 0.8em 0; }
+    a { color: var(--accent); text-decoration-thickness: 0.08em; text-underline-offset: 0.16em; }
+    code {
+      padding: 0.14em 0.34em;
+      border-radius: 4px;
+      background: var(--code-bg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+    pre {
+      overflow: auto;
+      margin: 1em 0;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--code-bg);
+    }
+    pre code { padding: 0; background: transparent; font-size: 0.9rem; }
+    .toc {
+      margin: 1.4rem 0 2.2rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--code-bg) 72%, transparent);
+    }
+    .toc h2 { margin: 0 0 0.45rem; padding: 0; border: 0; font-size: 1rem; }
+    .toc ul { margin: 0; padding-left: 1.2rem; columns: 2; column-gap: 2rem; }
+    .toc li { break-inside: avoid; margin: 0.2rem 0; }
+    .toc-level-3 { margin-left: 1rem; font-size: 0.94em; color: var(--muted); }
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 620px; }
+    th, td { padding: 0.58rem 0.72rem; border: 1px solid var(--border); vertical-align: top; }
+    th { background: var(--table-head); text-align: left; font-weight: 650; }
+    tr:nth-child(even) td { background: color-mix(in srgb, var(--code-bg) 35%, transparent); }
+    @media (max-width: 760px) {
+      .page { width: 100%; margin: 0; padding: 24px 16px; border: 0; border-radius: 0; }
+      h1 { font-size: 1.8rem; }
+      .toc ul { columns: 1; }
+      table { min-width: 560px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+<h1 id="garmin-ai">garmin-ai</h1>
+<nav class="toc" aria-label="目录"><h2>目录</h2><ul><li class="toc-level-2"><a href="#功能概览">功能概览</a></li><li class="toc-level-2"><a href="#项目结构">项目结构</a></li><li class="toc-level-2"><a href="#环境要求">环境要求</a></li><li class="toc-level-2"><a href="#安装-初始化">安装/初始化</a></li><li class="toc-level-2"><a href="#认证">认证</a></li><li class="toc-level-2"><a href="#基础用法">基础用法</a></li><li class="toc-level-2"><a href="#html-模式">html 模式</a></li><li class="toc-level-2"><a href="#compact-精简模式">compact 精简模式</a></li><li class="toc-level-2"><a href="#full-模式">full 模式</a></li><li class="toc-level-2"><a href="#输出目录">输出目录</a></li><li class="toc-level-3"><a href="#fit-缓存">FIT 缓存</a></li><li class="toc-level-3"><a href="#full-模式导出">full 模式导出</a></li><li class="toc-level-3"><a href="#html-模式导出">html 模式导出</a></li><li class="toc-level-3"><a href="#compact-模式导出">compact 模式导出</a></li><li class="toc-level-3"><a href="#csv-文件说明">CSV 文件说明</a></li><li class="toc-level-2"><a href="#导出文件说明">导出文件说明</a></li><li class="toc-level-3"><a href="#顶层文件是什么">顶层文件是什么</a></li><li class="toc-level-3"><a href="#单条活动文件是什么">单条活动文件是什么</a></li><li class="toc-level-3"><a href="#三个分段文件怎么选">三个分段文件怎么选</a></li><li class="toc-level-3"><a href="#逐点数据怎么选">逐点数据怎么选</a></li><li class="toc-level-2"><a href="#导出字段说明">导出字段说明</a></li><li class="toc-level-3"><a href="#basecontext-json-context-json-字段">base_context.json / context.json 字段</a></li><li class="toc-level-3"><a href="#summary-json-字段">summary.json 字段</a></li><li class="toc-level-3"><a href="#connectsplits-json-字段">connect_splits.json 字段</a></li><li class="toc-level-3"><a href="#fitlaps-csv-字段">fit_laps.csv 字段</a></li><li class="toc-level-3"><a href="#kmsplits-csv-字段">km_splits.csv 字段</a></li><li class="toc-level-3"><a href="#records-csv-records-parquet-字段">records.csv / records.parquet 字段</a></li><li class="toc-level-3"><a href="#runningdynamics-csv-字段">running_dynamics.csv 字段</a></li><li class="toc-level-3"><a href="#gps-csv-字段">gps.csv 字段</a></li><li class="toc-level-3"><a href="#events-csv-字段">events.csv 字段</a></li><li class="toc-level-3"><a href="#deviceinfo-json-developerfields-json-字段">device_info.json / developer_fields.json 字段</a></li><li class="toc-level-2"><a href="#数据使用优先级">数据使用优先级</a></li><li class="toc-level-2"><a href="#base-json-输出结构">base JSON 输出结构</a></li><li class="toc-level-2"><a href="#三类圈-分段的区别">三类圈/分段的区别</a></li><li class="toc-level-3"><a href="#connectsplits">connect_splits</a></li><li class="toc-level-3"><a href="#fitlaps">fit_laps</a></li><li class="toc-level-3"><a href="#kmsplits">km_splits</a></li><li class="toc-level-2"><a href="#summary-字段">summary 字段</a></li><li class="toc-level-2"><a href="#身体指标">身体指标</a></li><li class="toc-level-2"><a href="#错误输出">错误输出</a></li><li class="toc-level-3"><a href="#token-缺失或过期">token 缺失或过期</a></li><li class="toc-level-3"><a href="#garmin-限流">Garmin 限流</a></li><li class="toc-level-3"><a href="#fit-下载失败">FIT 下载失败</a></li><li class="toc-level-3"><a href="#fit-解析失败">FIT 解析失败</a></li><li class="toc-level-3"><a href="#未知错误">未知错误</a></li><li class="toc-level-2"><a href="#dataquality">data_quality</a></li><li class="toc-level-2"><a href="#html-导出">HTML 导出</a></li><li class="toc-level-2"><a href="#给-ai-分析时的建议">给 AI 分析时的建议</a></li><li class="toc-level-2"><a href="#常用命令速查">常用命令速查</a></li><li class="toc-level-2"><a href="#git-忽略">Git 忽略</a></li></ul></nav>
+<p><code>garmin-ai</code> 是一个本地 Garmin Connect CLI 工具，用来把 Garmin 运动、身体指标和 FIT 文件解析结果整理成适合 AI 分析的结构化数据。</p>
+<p>它只做本地命令行，不提供 Web 服务，不做 MCP。默认输出 JSON，错误也会输出 JSON，方便人类、Claude Code、Codex、Skill 或其他脚本通过 shell 调用。</p>
+<h2 id="功能概览">功能概览</h2>
+<ul><li>使用 <code>python-garminconnect</code> 登录 Garmin Connect 并读取数据</li><li>使用 Garmin 官方 <code>garmin-fit-sdk</code> 解析 FIT 文件</li><li>默认获取最近 1 条跑步</li><li>输出用户基础信息、当前身体指标、跑步 summary、当天身体指标、分段数据</li><li>区分 Garmin Connect 分段、FIT 原始 Lap、程序计算的固定每公里分段</li><li>full 模式导出 CSV、Parquet、JSON、HTML 图表和原始 FIT 文件</li><li>html 模式导出浏览器可读的总览页、单活动报告和图表</li><li>Garmin API 单个字段或接口失败时不会让整个 <code>base</code> 命令失败</li><li>缺失或失败的数据会在 <code>data_quality</code> 中标记</li></ul>
+<h2 id="项目结构">项目结构</h2>
+<pre><code class="language-text">garmin-ai/
+├── pyproject.toml
+├── README.md
+├── data/
+│   ├── fit/
+│   ├── cache/
+│   └── exports/
+├── src/
+│   └── garmin_ai/
+│       ├── cli.py
+│       ├── auth.py
+│       ├── errors.py
+│       ├── garmin_client.py
+│       ├── fit_downloader.py
+│       ├── fit_parser.py
+│       ├── split_calculator.py
+│       ├── metrics_collector.py
+│       ├── exporter.py
+│       ├── chart_builder.py
+│       ├── utils.py
+│       └── models.py
+└── skills/
+    └── garmin-running-analysis/
+        └── SKILL.md</code></pre>
+<p>实际代码采用 <code>src</code> layout，CLI 入口是：</p>
+<pre><code class="language-toml">[project.scripts]
+garmin-ai = &quot;garmin_ai.cli:app&quot;</code></pre>
+<h2 id="环境要求">环境要求</h2>
+<ul><li>Python 3.12 推荐</li><li>项目声明 Python <code>&gt;=3.11</code></li><li>当前使用 GitHub <code>cyberjunky/python-garminconnect</code> 的 <code>v0.3.4</code> tag，因为该版本修复了中国区账号 DI OAuth2 token 刷新走 <code>diauth.garmin.cn</code> 的问题</li><li><code>garminconnect</code> 当前包元数据要求 Python <code>&gt;=3.12</code>，所以实际使用建议用 Python 3.12</li><li>使用 <code>uv</code> 管理依赖和运行命令</li></ul>
+<p>依赖包括：</p>
+<ul><li><code>garminconnect</code></li><li><code>curl_cffi</code></li><li><code>garmin-fit-sdk</code></li><li><code>typer</code></li><li><code>rich</code></li><li><code>pandas</code></li><li><code>pyarrow</code></li><li><code>plotly</code></li></ul>
+<h2 id="安装-初始化">安装/初始化</h2>
+<p>在项目根目录运行：</p>
+<pre><code class="language-bash">uv sync</code></pre>
+<p>查看 CLI 是否可用：</p>
+<pre><code class="language-bash">uv run garmin-ai --help</code></pre>
+<p>查看 <code>base</code> 命令参数：</p>
+<pre><code class="language-bash">uv run garmin-ai base --help</code></pre>
+<h2 id="认证">认证</h2>
+<p>首次使用前运行：</p>
+<pre><code class="language-bash">uv run garmin-ai auth</code></pre>
+<p>命令会交互式提示输入：</p>
+<pre><code class="language-text">Garmin email:
+Garmin password:</code></pre>
+<p>如果 Garmin 账号开启了两步验证，登录流程会继续提示输入验证码。</p>
+<p>认证成功后，token 会保存到：</p>
+<pre><code class="language-text">~/.garminconnect</code></pre>
+<p>当前默认登录 Garmin 中国区账号。代码中创建 Garmin 客户端时使用 <code>is_cn=True</code>，所以 <code>auth</code> 和后续 <code>base</code> 查询都会走国内账号环境。</p>
+<p>项目不会保存账号密码，也不会要求把账号密码写入 <code>.env</code>、配置文件或代码。</p>
+<p>普通查询命令不会交互式输入验证码。只有 <code>garmin-ai auth</code> 负责登录、两步验证和 token 初始化。</p>
+<h2 id="基础用法">基础用法</h2>
+<p>获取最近 1 条跑步基础上下文：</p>
+<pre><code class="language-bash">uv run garmin-ai base</code></pre>
+<p>等价于：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --no-full --json</code></pre>
+<p>获取最近 5 条跑步：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5</code></pre>
+<p>默认会在 <code>current_metrics.sleep</code> 返回最近 7 天精简睡眠摘要。调整天数：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --sleep-days 7 --json</code></pre>
+<p>输出保存成 JSON 文件：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --output ./data/exports/base_context.json</code></pre>
+<p>输出到目录，并额外导出基础 CSV/JSON：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --output ./data/exports/base</code></pre>
+<h2 id="html-模式">html 模式</h2>
+<p>html 模式会生成适合人直接浏览的 HTML 导出：顶层 <code>index.html</code> 是最近跑步总览，每条活动目录下的 <code>index.html</code> 是单次跑步报告，并内嵌 Plotly 图表。HTML 模式会将最近 N 天睡眠数据渲染为摘要卡片、每日表格和趋势图。</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode html --output ./data/exports/html</code></pre>
+<p>图表默认使用距离作为 x 轴。需要按时间查看时使用：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode html --chart-x time --output ./data/exports/html</code></pre>
+<p>生成后直接打开：</p>
+<pre><code class="language-text">data/exports/html/&lt;run_id&gt;/index.html</code></pre>
+<p>如果不传 <code>--output</code>，html 模式默认写入：</p>
+<pre><code class="language-text">data/exports/latest/&lt;run_id&gt;/</code></pre>
+<p>目录型导出每次都会创建一个独立的 <code>&lt;run_id&gt;</code> 子目录，格式类似 <code>20260531-143012</code>，避免覆盖上一次导出。导出完成后会在同级目录生成同名压缩包，例如 <code>&lt;run_id&gt;.zip</code>。直接指定 <code>.json</code> 文件时例外，会写入该 JSON 文件本身，不生成压缩包。</p>
+<h2 id="compact-精简模式">compact 精简模式</h2>
+<p>compact 模式用于生成更省 token 的报告。顶层 <code>index.html</code> 的 Current Metrics 表和 base HTML 保持一致，并保留 Sleep Summary 表格与 Recent Runs，但去除睡眠趋势图；单次活动 <code>index.html</code> 去除图表，只保留 Summary 和 Connect Splits。compact 模式不会生成 <code>charts.html</code>，也不会下载/解析 FIT。</p>
+<p>输出精简 HTML：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode compact --compact-format html --output ./data/exports/compact</code></pre>
+<p>输出精简 JSON：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode compact --compact-format json --output ./data/exports/compact-json
+uv run garmin-ai base --limit 5 --mode compact --compact-format json --output ./data/exports/compact.json</code></pre>
+<h2 id="full-模式">full 模式</h2>
+<p>full 模式会下载并保留原始 FIT 文件，导出逐点 records、跑步动态、GPS、事件、设备信息、开发者字段和 HTML 图表。</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --mode full --output ./data/exports/latest</code></pre>
+<p>full 模式也支持切换图表 x 轴：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --mode full --chart-x distance --output ./data/exports/latest
+uv run garmin-ai base --limit 1 --mode full --chart-x time --output ./data/exports/latest</code></pre>
+<p><code>--full</code> 仍然可用，等价于 <code>--mode full</code>。</p>
+<p>full 模式下，主 JSON 不会直接塞入完整 records，只返回文件路径和统计信息，避免输出过大。</p>
+<h2 id="输出目录">输出目录</h2>
+<h3 id="fit-缓存">FIT 缓存</h3>
+<p>下载的原始 FIT 缓存在：</p>
+<pre><code class="language-text">data/fit/</code></pre>
+<p>文件名类似：</p>
+<pre><code class="language-text">data/fit/123456789.fit</code></pre>
+<p>如果使用默认 <code>--cache</code>，同一个活动再次运行时会复用已有 FIT 文件。</p>
+<p>强制重新下载：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --no-cache</code></pre>
+<h3 id="full-模式导出">full 模式导出</h3>
+<p>示例命令：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --mode full --output ./data/exports/latest</code></pre>
+<p>输出结构：</p>
+<pre><code class="language-text">data/exports/latest/&lt;run_id&gt;/
+├── base_context.json
+├── recent_runs.json
+├── index.html
+└── 123456789/
+    ├── context.json
+    ├── summary.json
+    ├── connect_splits.json
+    ├── fit_laps.csv
+    ├── km_splits.csv
+    ├── records.csv
+    ├── records.parquet
+    ├── running_dynamics.csv
+    ├── gps.csv
+    ├── events.csv
+    ├── device_info.json
+    ├── developer_fields.json
+    ├── original.fit
+    └── charts.html
+
+data/exports/latest/&lt;run_id&gt;.zip</code></pre>
+<h3 id="html-模式导出">html 模式导出</h3>
+<p>示例命令：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode html --output ./data/exports/html</code></pre>
+<p>输出结构：</p>
+<pre><code class="language-text">data/exports/html/&lt;run_id&gt;/
+├── base_context.json
+├── recent_runs.json
+├── index.html
+└── 123456789/
+    ├── context.json
+    ├── index.html
+    └── charts.html
+
+data/exports/html/&lt;run_id&gt;.zip</code></pre>
+<p>html 模式不会导出 <code>records.csv</code>、<code>records.parquet</code>、<code>original.fit</code> 等 full 模式的大文件，适合只想人工查看总览、分段和曲线时使用。</p>
+<h3 id="compact-模式导出">compact 模式导出</h3>
+<p>示例命令：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode compact --compact-format html --output ./data/exports/compact</code></pre>
+<p>HTML 输出结构：</p>
+<pre><code class="language-text">data/exports/compact/&lt;run_id&gt;/
+├── base_context.json
+├── recent_runs.json
+├── index.html
+└── 123456789/
+    ├── context.json
+    ├── summary.json
+    ├── connect_splits.json
+    └── index.html
+
+data/exports/compact/&lt;run_id&gt;.zip</code></pre>
+<p>JSON 输出结构：</p>
+<pre><code class="language-text">data/exports/compact-json/&lt;run_id&gt;/
+├── base_context.json
+├── recent_runs.json
+└── 123456789/
+    ├── context.json
+    ├── summary.json
+    └── connect_splits.json
+
+data/exports/compact-json/&lt;run_id&gt;.zip</code></pre>
+<p>compact 模式只保留顶层身体指标、睡眠摘要、最近跑步 summary 和 Connect Splits，适合把结果直接交给 AI 做低 token 分析。</p>
+<h3 id="csv-文件说明">CSV 文件说明</h3>
+<p>CSV 文件在每个活动目录下：</p>
+<pre><code class="language-text">data/exports/latest/&lt;run_id&gt;/&lt;activity_id&gt;/</code></pre>
+<p>常用文件：</p>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>来源</th><th>用途</th></tr></thead><tbody><tr><td><code>fit_laps.csv</code></td><td>FIT <code>lap_mesgs</code></td><td>手表写入的原始 Lap，可能是自动 Lap、手动 Lap 或训练课分段</td></tr><tr><td><code>km_splits.csv</code></td><td>FIT <code>record_mesgs</code></td><td>程序按固定每公里重新计算，适合稳定分析配速/心率/步频/功率</td></tr><tr><td><code>records.csv</code></td><td>FIT <code>record_mesgs</code></td><td>逐点记录，通常是逐秒或非固定间隔</td></tr><tr><td><code>running_dynamics.csv</code></td><td>FIT records 中的跑步动态字段</td><td>垂直振幅、触地时间、触地平衡、步幅、垂直比等</td></tr><tr><td><code>gps.csv</code></td><td>FIT records 中的经纬度</td><td>GPS 轨迹点</td></tr><tr><td><code>events.csv</code></td><td>FIT <code>event_mesgs</code></td><td>事件记录</td></tr></tbody></table></div>
+<h2 id="导出文件说明">导出文件说明</h2>
+<p>导出目录会根据模式包含 JSON、CSV、Parquet、HTML 和原始 FIT 文件。先按文件粒度理解它们：</p>
+<ul><li>顶层文件描述本次命令的整体结果</li><li>单条活动 JSON 描述某一次跑步的摘要和上下文</li><li>CSV / Parquet 保存可表格化分析的数据</li><li>HTML 用于人工浏览总览、单活动报告和图表</li><li><code>original.fit</code> 是最原始的数据来源</li></ul>
+<h3 id="顶层文件是什么">顶层文件是什么</h3>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>是什么</th><th>什么时候用</th></tr></thead><tbody><tr><td><code>base_context.json</code></td><td>本次 <code>garmin-ai base</code> 的完整上下文，包含用户信息、当前身体指标、最近跑步列表和每条跑步的关键数据</td><td>直接交给 AI 做整体分析</td></tr><tr><td><code>recent_runs.json</code></td><td><code>base_context.json</code> 里的 <code>recent_runs</code> 单独拆出来</td><td>只关心跑步活动，不关心用户基础信息时使用</td></tr><tr><td><code>index.html</code></td><td>导出目录的 HTML 入口页；html 模式展示总览表，full 模式链接到每条活动的 <code>charts.html</code></td><td>人工浏览入口</td></tr></tbody></table></div>
+<p><code>base_context.json</code> 不会内嵌完整逐点 <code>records</code>，所以适合作为默认 AI 上下文。</p>
+<h3 id="单条活动文件是什么">单条活动文件是什么</h3>
+<p>这些文件位于：</p>
+<pre><code class="language-text">data/exports/latest/&lt;run_id&gt;/&lt;activity_id&gt;/</code></pre>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>是什么</th><th>来源</th><th>什么时候用</th></tr></thead><tbody><tr><td><code>context.json</code></td><td>单条跑步的完整上下文</td><td><code>base</code> 汇总结果</td><td>把某一条跑步单独交给 AI 分析</td></tr><tr><td><code>summary.json</code></td><td>单条跑步概要数据</td><td>Garmin Connect 活动 summary，部分字段归一化计算</td><td>快速看距离、时间、配速、心率、训练效果、设备等整体表现</td></tr><tr><td><code>connect_splits.json</code></td><td>Garmin Connect 返回的分段、圈、训练段或摘要</td><td>Garmin Connect split 相关 API</td><td>对照 Garmin Connect 页面上的分段数据</td></tr><tr><td><code>fit_laps.csv</code></td><td>设备写入 FIT 的原始 Lap</td><td>FIT <code>lap_mesgs</code></td><td>分析自动 Lap、手动 Lap、训练课分段</td></tr><tr><td><code>km_splits.csv</code></td><td>程序按固定每公里重新计算的分段</td><td>FIT <code>record_mesgs</code></td><td>分析每公里配速、心率、步频、功率和跑步动态变化</td></tr><tr><td><code>records.csv</code></td><td>FIT 逐点记录</td><td>FIT <code>record_mesgs</code></td><td>用户要求逐秒或逐点分析时使用</td></tr><tr><td><code>records.parquet</code></td><td>和 <code>records.csv</code> 内容相同的 Parquet 版本</td><td>FIT <code>record_mesgs</code></td><td>大文件、批处理或 pandas/pyarrow 分析</td></tr><tr><td><code>running_dynamics.csv</code></td><td>从逐点记录中拆出的跑步动态</td><td>FIT <code>record_mesgs</code></td><td>用户要求逐秒跑步动态分析时使用</td></tr><tr><td><code>gps.csv</code></td><td>从逐点记录中拆出的 GPS 轨迹点</td><td>FIT <code>record_mesgs</code></td><td>用户明确要求路线、轨迹、地图、GPS 或路线相关分析时使用</td></tr><tr><td><code>events.csv</code></td><td>活动事件记录</td><td>FIT <code>event_mesgs</code></td><td>排查暂停、恢复、Lap、训练阶段等事件</td></tr><tr><td><code>device_info.json</code></td><td>FIT 中的设备信息</td><td>FIT <code>device_info_mesgs</code></td><td>排查数据来自哪块表、哪台设备或哪些传感器</td></tr><tr><td><code>developer_fields.json</code></td><td>FIT 中的开发者字段说明</td><td>FIT <code>developer_data_id_mesgs</code>、<code>field_description_mesgs</code></td><td>排查特殊字段、第三方数据源或设备扩展数据</td></tr><tr><td><code>original.fit</code></td><td>Garmin Connect 下载的原始 FIT 文件</td><td>Garmin Connect original activity download</td><td>重新解析、用其他 FIT 工具验证、排查 SDK 差异</td></tr><tr><td><code>charts.html</code></td><td>单条活动的 Plotly 静态图表</td><td><code>records</code>、<code>km_splits</code>、<code>gps</code> 等导出数据</td><td>详细分析时先看趋势图，再结合结构化数据</td></tr><tr><td><code>index.html</code></td><td>html 模式的单条活动报告</td><td><code>summary</code>、<code>day_metrics</code>、<code>km_splits</code>、<code>fit_laps</code>、<code>connect_splits</code>、<code>charts.html</code></td><td>人工查看单次跑步</td></tr></tbody></table></div>
+<h3 id="三个分段文件怎么选">三个分段文件怎么选</h3>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>含义</th><th>是否一定每公里</th><th>推荐用途</th></tr></thead><tbody><tr><td><code>connect_splits.json</code></td><td>Garmin Connect 后台返回的分段/圈/训练段</td><td>不一定</td><td>对照 Garmin Connect 页面</td></tr><tr><td><code>fit_laps.csv</code></td><td>手表写入 FIT 的原始 Lap</td><td>不一定</td><td>分析设备原始 Lap、手动 Lap、训练课阶段</td></tr><tr><td><code>km_splits.csv</code></td><td>程序按 FIT records 重新计算的固定每公里</td><td>是，最后一段可能不足 1 公里</td><td>AI 分析配速、心率、步频、功率变化</td></tr></tbody></table></div>
+<p>如果目标是“跑步表现分析”，通常优先读 <code>km_splits.csv</code>。如果目标是“为什么 Garmin 页面这么显示”，优先看 <code>connect_splits.json</code>。如果目标是“手表当时怎么记圈”，优先看 <code>fit_laps.csv</code>。</p>
+<h3 id="逐点数据怎么选">逐点数据怎么选</h3>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>粒度</th><th>默认是否建议读取</th><th>说明</th></tr></thead><tbody><tr><td><code>records.csv</code></td><td>活动逐点记录</td><td>只在用户要求逐秒/逐点分析时读取</td><td>文件可能较大，适合曲线和细节分析</td></tr><tr><td><code>running_dynamics.csv</code></td><td>逐点跑步动态</td><td>只在用户要求逐秒/跑步动态分析时读取</td><td>不同设备支持程度不同，可能为空</td></tr><tr><td><code>gps.csv</code></td><td>逐点 GPS</td><td>默认不读取</td><td>除非用户要求路线、轨迹、GPS、地图、爬升位置或配速与路线关系</td></tr></tbody></table></div>
+<h2 id="导出字段说明">导出字段说明</h2>
+<p>这一节解释导出文件中的字段。字段缺失时会返回空值，不会伪造 Garmin 数据。</p>
+<h3 id="basecontext-json-context-json-字段"><code>base_context.json</code> / <code>context.json</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>ok</code></td><td>命令是否成功</td></tr><tr><td><code>mode</code></td><td><code>basic</code>、<code>full</code> 或 <code>html</code></td></tr><tr><td><code>chart_x</code></td><td>图表 x 轴模式，<code>distance</code> 或 <code>time</code></td></tr><tr><td><code>generated_at</code></td><td>本次数据生成时间</td></tr><tr><td><code>profile</code></td><td>用户基础数据，如身高、年龄</td></tr><tr><td><code>current_metrics</code></td><td>当前或最近身体指标</td></tr><tr><td><code>recent_runs</code></td><td>最近跑步列表</td></tr><tr><td><code>activity_id</code></td><td>Garmin 活动 ID</td></tr><tr><td><code>date</code></td><td>活动日期</td></tr><tr><td><code>summary</code></td><td>单次跑步概要</td></tr><tr><td><code>day_metrics</code></td><td>跑步当天身体指标</td></tr><tr><td><code>connect_splits</code></td><td>Garmin Connect API 返回的分段</td></tr><tr><td><code>fit_laps</code></td><td>FIT 原始 Lap</td></tr><tr><td><code>km_splits</code></td><td>程序计算的固定每公里分段</td></tr><tr><td><code>full_data</code></td><td>full 模式导出的文件路径和统计信息</td></tr><tr><td><code>html_data</code></td><td>html 模式导出的文件路径和统计信息</td></tr><tr><td><code>data_quality</code></td><td>缺失、错误、降级信息</td></tr></tbody></table></div>
+<h3 id="summary-json-字段"><code>summary.json</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>activity_id</code></td><td>Garmin 活动 ID</td></tr><tr><td><code>activity_name</code></td><td>活动名称</td></tr><tr><td><code>activity_type</code></td><td>活动类型</td></tr><tr><td><code>start_time_local</code></td><td>本地开始时间</td></tr><tr><td><code>date</code></td><td>活动日期</td></tr><tr><td><code>distance_m</code> / <code>distance_km</code></td><td>距离，单位米/公里</td></tr><tr><td><code>duration_seconds</code></td><td>计时持续时间</td></tr><tr><td><code>moving_duration_seconds</code></td><td>移动时间</td></tr><tr><td><code>elapsed_seconds</code></td><td>总经过时间，包含暂停等</td></tr><tr><td><code>avg_pace_sec_per_km</code></td><td>平均配速，单位秒/公里</td></tr><tr><td><code>best_pace_sec_per_km</code></td><td>最快配速，单位秒/公里</td></tr><tr><td><code>avg_speed_mps</code> / <code>max_speed_mps</code></td><td>平均/最大速度，单位米/秒</td></tr><tr><td><code>avg_hr</code> / <code>max_hr</code> / <code>min_hr</code></td><td>平均/最大/最低心率</td></tr><tr><td><code>avg_cadence_spm</code> / <code>max_cadence_spm</code></td><td>平均/最大步频，单位步/分钟</td></tr><tr><td><code>avg_power_w</code> / <code>max_power_w</code></td><td>平均/最大功率，单位瓦</td></tr><tr><td><code>normalized_power_w</code></td><td>标准化功率</td></tr><tr><td><code>elevation_gain_m</code> / <code>elevation_loss_m</code></td><td>累计爬升/下降，单位米</td></tr><tr><td><code>min_altitude_m</code> / <code>max_altitude_m</code></td><td>最低/最高海拔，单位米</td></tr><tr><td><code>calories</code></td><td>消耗热量</td></tr><tr><td><code>training_effect_aerobic</code></td><td>有氧训练效果</td></tr><tr><td><code>training_effect_anaerobic</code></td><td>无氧训练效果</td></tr><tr><td><code>training_load</code></td><td>训练负荷</td></tr><tr><td><code>vo2max_from_activity</code></td><td>本次活动相关 VO2max</td></tr><tr><td><code>recovery_time_hours</code></td><td>建议恢复时间，单位小时</td></tr><tr><td><code>avg_stride_length_m</code></td><td>平均步幅，单位米</td></tr><tr><td><code>avg_vertical_oscillation_mm</code></td><td>平均垂直振幅，单位毫米</td></tr><tr><td><code>avg_ground_contact_time_ms</code></td><td>平均触地时间，单位毫秒</td></tr><tr><td><code>avg_ground_contact_balance_left_percent</code></td><td>平均左侧触地平衡百分比</td></tr><tr><td><code>avg_vertical_ratio_percent</code></td><td>平均垂直比</td></tr><tr><td><code>temperature_avg_c</code> / <code>temperature_min_c</code> / <code>temperature_max_c</code></td><td>平均/最低/最高温度，单位摄氏度</td></tr><tr><td><code>device_name</code></td><td>设备名称</td></tr><tr><td><code>manufacturer</code></td><td>设备厂商</td></tr></tbody></table></div>
+<h3 id="connectsplits-json-字段"><code>connect_splits.json</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>source</code></td><td>数据来自 <code>splits</code>、<code>typed_splits</code> 或 <code>split_summaries</code></td></tr><tr><td><code>raw</code></td><td>Garmin Connect 返回的原始结构</td></tr><tr><td><code>split_index</code></td><td>分段序号</td></tr><tr><td><code>distance_m</code></td><td>分段距离，单位米</td></tr><tr><td><code>duration_seconds</code></td><td>分段用时，单位秒</td></tr><tr><td><code>avg_pace_sec_per_km</code></td><td>分段平均配速，单位秒/公里</td></tr><tr><td><code>avg_hr</code> / <code>max_hr</code></td><td>分段平均/最大心率</td></tr><tr><td><code>avg_cadence_spm</code></td><td>分段平均步频</td></tr><tr><td><code>avg_power_w</code></td><td>分段平均功率</td></tr></tbody></table></div>
+<h3 id="fitlaps-csv-字段"><code>fit_laps.csv</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>lap_index</code></td><td>Lap 序号</td></tr><tr><td><code>start_time</code> / <code>end_time</code></td><td>Lap 开始/结束时间</td></tr><tr><td><code>distance_m</code></td><td>Lap 距离，单位米</td></tr><tr><td><code>duration_seconds</code></td><td>Lap 计时持续时间</td></tr><tr><td><code>moving_duration_seconds</code></td><td>Lap 移动时间</td></tr><tr><td><code>elapsed_seconds</code></td><td>Lap 总经过时间</td></tr><tr><td><code>avg_pace_sec_per_km</code></td><td>Lap 平均配速</td></tr><tr><td><code>avg_speed_mps</code> / <code>max_speed_mps</code></td><td>Lap 平均/最大速度</td></tr><tr><td><code>avg_hr</code> / <code>max_hr</code></td><td>Lap 平均/最大心率</td></tr><tr><td><code>avg_cadence_spm</code> / <code>max_cadence_spm</code></td><td>Lap 平均/最大步频</td></tr><tr><td><code>avg_power_w</code> / <code>max_power_w</code></td><td>Lap 平均/最大功率</td></tr><tr><td><code>elevation_gain_m</code> / <code>elevation_loss_m</code></td><td>Lap 爬升/下降</td></tr><tr><td><code>calories</code></td><td>Lap 消耗热量</td></tr><tr><td><code>lap_trigger</code></td><td>Lap 触发方式，如自动、手动或训练阶段</td></tr><tr><td><code>sport</code></td><td>运动类型</td></tr></tbody></table></div>
+<h3 id="kmsplits-csv-字段"><code>km_splits.csv</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>km_index</code></td><td>第几个公里分段</td></tr><tr><td><code>partial</code></td><td>是否为不足 1 公里的尾段</td></tr><tr><td><code>start_distance_m</code> / <code>end_distance_m</code></td><td>分段起止距离</td></tr><tr><td><code>distance_m</code></td><td>分段实际距离</td></tr><tr><td><code>start_time</code> / <code>end_time</code></td><td>分段起止时间</td></tr><tr><td><code>duration_seconds</code></td><td>分段用时</td></tr><tr><td><code>pace_sec_per_km</code></td><td>分段配速，单位秒/公里</td></tr><tr><td><code>avg_speed_mps</code> / <code>max_speed_mps</code></td><td>平均/最大速度</td></tr><tr><td><code>avg_hr</code> / <code>max_hr</code> / <code>min_hr</code></td><td>平均/最大/最低心率</td></tr><tr><td><code>avg_cadence_spm</code> / <code>max_cadence_spm</code></td><td>平均/最大步频</td></tr><tr><td><code>avg_power_w</code> / <code>max_power_w</code></td><td>平均/最大功率</td></tr><tr><td><code>avg_stride_length_m</code></td><td>平均步幅</td></tr><tr><td><code>avg_vertical_oscillation_mm</code></td><td>平均垂直振幅</td></tr><tr><td><code>avg_ground_contact_time_ms</code></td><td>平均触地时间</td></tr><tr><td><code>avg_ground_contact_balance_left_percent</code></td><td>平均左侧触地平衡百分比</td></tr><tr><td><code>avg_vertical_ratio_percent</code></td><td>平均垂直比</td></tr><tr><td><code>elevation_gain_m</code> / <code>elevation_loss_m</code></td><td>分段爬升/下降</td></tr><tr><td><code>start_lat</code> / <code>start_lon</code></td><td>分段起点经纬度</td></tr><tr><td><code>end_lat</code> / <code>end_lon</code></td><td>分段终点经纬度</td></tr></tbody></table></div>
+<h3 id="records-csv-records-parquet-字段"><code>records.csv</code> / <code>records.parquet</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>timestamp</code></td><td>记录时间</td></tr><tr><td><code>elapsed_seconds</code></td><td>从活动第一条记录开始经过的秒数</td></tr><tr><td><code>distance_m</code></td><td>累计距离，单位米</td></tr><tr><td><code>speed_mps</code></td><td>当前速度，单位米/秒</td></tr><tr><td><code>pace_sec_per_km</code></td><td>当前配速，单位秒/公里</td></tr><tr><td><code>heart_rate</code></td><td>心率</td></tr><tr><td><code>cadence_spm</code></td><td>步频，单位步/分钟</td></tr><tr><td><code>power_w</code></td><td>功率，单位瓦</td></tr><tr><td><code>altitude_m</code></td><td>海拔，单位米</td></tr><tr><td><code>temperature_c</code></td><td>温度，单位摄氏度</td></tr><tr><td><code>lat</code> / <code>lon</code></td><td>经纬度</td></tr><tr><td><code>vertical_oscillation_mm</code></td><td>垂直振幅</td></tr><tr><td><code>ground_contact_time_ms</code></td><td>触地时间</td></tr><tr><td><code>ground_contact_balance_left_percent</code></td><td>左侧触地平衡百分比</td></tr><tr><td><code>stride_length_m</code></td><td>步幅</td></tr><tr><td><code>vertical_ratio_percent</code></td><td>垂直比</td></tr></tbody></table></div>
+<h3 id="runningdynamics-csv-字段"><code>running_dynamics.csv</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>timestamp</code></td><td>记录时间</td></tr><tr><td><code>distance_m</code></td><td>累计距离</td></tr><tr><td><code>vertical_oscillation_mm</code></td><td>垂直振幅</td></tr><tr><td><code>ground_contact_time_ms</code></td><td>触地时间</td></tr><tr><td><code>ground_contact_balance_left_percent</code></td><td>左侧触地平衡百分比</td></tr><tr><td><code>stride_length_m</code></td><td>步幅</td></tr><tr><td><code>vertical_ratio_percent</code></td><td>垂直比</td></tr></tbody></table></div>
+<p>并不是所有设备都会记录跑步动态。如果设备不支持或没有佩戴对应传感器，这个文件可能为空。</p>
+<h3 id="gps-csv-字段"><code>gps.csv</code> 字段</h3>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>timestamp</code></td><td>记录时间</td></tr><tr><td><code>distance_m</code></td><td>累计距离</td></tr><tr><td><code>lat</code> / <code>lon</code></td><td>经纬度</td></tr><tr><td><code>altitude_m</code></td><td>海拔</td></tr></tbody></table></div>
+<p>如果活动是室内跑、跑步机或设备没有 GPS，这个文件可能为空。默认分析不读取 GPS，除非用户明确要求路线、轨迹、地图或路线相关分析。</p>
+<h3 id="events-csv-字段"><code>events.csv</code> 字段</h3>
+<p><code>events.csv</code> 保留 FIT <code>event_mesgs</code> 的原始事件字段，不同设备差异较大。常见含义包括开始、停止、暂停、恢复、Lap 事件和训练阶段事件。</p>
+<h3 id="deviceinfo-json-developerfields-json-字段"><code>device_info.json</code> / <code>developer_fields.json</code> 字段</h3>
+<p>这两个文件尽量保留 FIT 原始结构。字段取决于设备、传感器和 FIT 文件内容，主要用于排查设备来源、传感器来源、软件版本、产品 ID 和开发者扩展字段。</p>
+<h2 id="数据使用优先级">数据使用优先级</h2>
+<p>不同分析任务建议读不同文件：</p>
+<div class="table-wrap"><table><thead><tr><th>任务</th><th>优先使用</th></tr></thead><tbody><tr><td>快速总结最近一次跑步</td><td><code>base_context.json</code> 或 <code>context.json</code></td></tr><tr><td>分析整体强度</td><td><code>summary.json</code>、<code>day_metrics</code></td></tr><tr><td>分析每公里配速/心率/步频/功率</td><td><code>km_splits.csv</code></td></tr><tr><td>分析手表原始 Lap</td><td><code>fit_laps.csv</code></td></tr><tr><td>对照 Garmin Connect 分段</td><td><code>connect_splits.json</code></td></tr><tr><td>逐秒/逐点曲线分析</td><td><code>records.csv</code> 或 <code>records.parquet</code></td></tr><tr><td>跑步动态分析</td><td><code>running_dynamics.csv</code></td></tr><tr><td>路线/GPS 分析</td><td><code>gps.csv</code></td></tr><tr><td>暂停/事件排查</td><td><code>events.csv</code></td></tr><tr><td>设备/传感器排查</td><td><code>device_info.json</code>、<code>developer_fields.json</code></td></tr></tbody></table></div>
+<h2 id="base-json-输出结构">base JSON 输出结构</h2>
+<p>基础模式返回结构接近：</p>
+<pre><code class="language-json">{
+  &quot;ok&quot;: true,
+  &quot;mode&quot;: &quot;basic&quot;,
+  &quot;generated_at&quot;: &quot;2026-05-30T12:00:00+08:00&quot;,
+  &quot;profile&quot;: {
+    &quot;height_cm&quot;: null,
+    &quot;age&quot;: null,
+    &quot;max_heart_rate&quot;: null,
+    &quot;lactate_threshold_heart_rate&quot;: null
+  },
+  &quot;current_metrics&quot;: {
+    &quot;date&quot;: &quot;2026-05-30&quot;,
+    &quot;daily_max_heart_rate&quot;: null,
+    &quot;resting_heart_rate&quot;: null,
+    &quot;hrv&quot;: null,
+    &quot;weight_kg&quot;: null,
+    &quot;vo2max&quot;: null,
+    &quot;vo2max_precise&quot;: null,
+    &quot;sleep&quot;: {
+      &quot;days&quot;: 7,
+      &quot;items&quot;: [
+        {
+          &quot;date&quot;: &quot;2026-05-30&quot;,
+          &quot;sleep_score&quot;: null,
+          &quot;total_sleep_seconds&quot;: null,
+          &quot;total_sleep_hours&quot;: null,
+          &quot;deep_sleep_seconds&quot;: null,
+          &quot;light_sleep_seconds&quot;: null,
+          &quot;rem_sleep_seconds&quot;: null,
+          &quot;awake_seconds&quot;: null,
+          &quot;sleep_start&quot;: null,
+          &quot;sleep_end&quot;: null,
+          &quot;missing&quot;: true
+        }
+      ],
+      &quot;summary&quot;: {
+        &quot;avg_sleep_score&quot;: null,
+        &quot;avg_total_sleep_hours&quot;: null,
+        &quot;avg_deep_sleep_hours&quot;: null,
+        &quot;avg_light_sleep_hours&quot;: null,
+        &quot;avg_rem_sleep_hours&quot;: null,
+        &quot;avg_awake_minutes&quot;: null,
+        &quot;valid_days&quot;: 0,
+        &quot;missing_days&quot;: 7
+      }
+    }
+  },
+  &quot;recent_runs&quot;: [
+    {
+      &quot;activity_id&quot;: &quot;123456789&quot;,
+      &quot;date&quot;: &quot;2026-05-29&quot;,
+      &quot;summary&quot;: {},
+      &quot;day_metrics&quot;: {},
+      &quot;connect_splits&quot;: [],
+      &quot;fit_laps&quot;: [],
+      &quot;km_splits&quot;: [],
+      &quot;data_quality&quot;: {}
+    }
+  ],
+  &quot;data_quality&quot;: {}
+}</code></pre>
+<p>full 模式中，每条 <code>recent_runs[]</code> 会额外包含：</p>
+<pre><code class="language-json">{
+  &quot;full_data&quot;: {
+    &quot;fit_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/original.fit&quot;,
+    &quot;records_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/records.csv&quot;,
+    &quot;records_parquet_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/records.parquet&quot;,
+    &quot;running_dynamics_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/running_dynamics.csv&quot;,
+    &quot;gps_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/gps.csv&quot;,
+    &quot;events_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/events.csv&quot;,
+    &quot;device_info_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/device_info.json&quot;,
+    &quot;developer_fields_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/developer_fields.json&quot;,
+    &quot;charts_file&quot;: &quot;data/exports/latest/20260531-143012/123456789/charts.html&quot;,
+    &quot;record_count&quot;: 0,
+    &quot;gps_point_count&quot;: 0,
+    &quot;has_power&quot;: false,
+    &quot;has_running_dynamics&quot;: false
+  }
+}</code></pre>
+<p>html 模式中，每条 <code>recent_runs[]</code> 会额外包含：</p>
+<pre><code class="language-json">{
+  &quot;html_data&quot;: {
+    &quot;html_file&quot;: &quot;data/exports/html/20260531-143012/123456789/index.html&quot;,
+    &quot;charts_file&quot;: &quot;data/exports/html/20260531-143012/123456789/charts.html&quot;,
+    &quot;record_count&quot;: 0,
+    &quot;gps_point_count&quot;: 0,
+    &quot;has_power&quot;: false,
+    &quot;has_running_dynamics&quot;: false
+  }
+}</code></pre>
+<h2 id="三类圈-分段的区别">三类圈/分段的区别</h2>
+<p><code>base</code> 中每条跑步都有三类分段：</p>
+<pre><code class="language-json">{
+  &quot;connect_splits&quot;: [],
+  &quot;fit_laps&quot;: [],
+  &quot;km_splits&quot;: []
+}</code></pre>
+<h3 id="connectsplits">connect_splits</h3>
+<p>来源是 Garmin Connect API：</p>
+<ul><li><code>get_activity_splits(activity_id)</code></li><li><code>get_activity_typed_splits(activity_id)</code></li><li><code>get_activity_split_summaries(activity_id)</code></li></ul>
+<p>它表示 Garmin Connect 返回的分段、圈、训练段或 split summary。它可能经过 Garmin 后台加工，不保证是每公里，也不保证等同于设备原始 Lap。</p>
+<h3 id="fitlaps">fit_laps</h3>
+<p>来源是原始 FIT 文件中的：</p>
+<pre><code class="language-text">lap_mesgs</code></pre>
+<p>它更接近设备写入的原始圈数据。可能是：</p>
+<ul><li>自动 Lap</li><li>手动 Lap</li><li>训练课程分段</li><li>设备根据运动类型写入的其他 Lap</li></ul>
+<p>注意：<code>fit_laps</code> 也不一定是每公里。</p>
+<h3 id="kmsplits">km_splits</h3>
+<p>来源是 FIT 文件中的：</p>
+<pre><code class="language-text">record_mesgs</code></pre>
+<p>程序按 <code>distance_m</code> 每 1000 米重新计算。它是固定每公里分段，适合 AI 分析：</p>
+<ul><li>配速变化</li><li>心率漂移</li><li>步频变化</li><li>功率变化</li><li>跑步动态变化</li><li>GPS 和爬升变化</li></ul>
+<p>第一版不做复杂边界插值，但会保证稳定可用。</p>
+<h2 id="summary-字段">summary 字段</h2>
+<p>每条跑步的 <code>summary</code> 会尽量包含：</p>
+<ul><li><code>activity_id</code></li><li><code>activity_name</code></li><li><code>activity_type</code></li><li><code>start_time_local</code></li><li><code>date</code></li><li><code>distance_m</code></li><li><code>distance_km</code></li><li><code>duration_seconds</code></li><li><code>moving_duration_seconds</code></li><li><code>elapsed_seconds</code></li><li><code>avg_pace_sec_per_km</code></li><li><code>best_pace_sec_per_km</code></li><li><code>avg_speed_mps</code></li><li><code>max_speed_mps</code></li><li><code>avg_hr</code></li><li><code>max_hr</code></li><li><code>min_hr</code></li><li><code>avg_cadence_spm</code></li><li><code>max_cadence_spm</code></li><li><code>avg_power_w</code></li><li><code>max_power_w</code></li><li><code>normalized_power_w</code></li><li><code>elevation_gain_m</code></li><li><code>elevation_loss_m</code></li><li><code>min_altitude_m</code></li><li><code>max_altitude_m</code></li><li><code>calories</code></li><li><code>training_effect_aerobic</code></li><li><code>training_effect_anaerobic</code></li><li><code>training_load</code></li><li><code>vo2max_from_activity</code></li><li><code>recovery_time_hours</code></li><li><code>avg_stride_length_m</code></li><li><code>avg_vertical_oscillation_mm</code></li><li><code>avg_ground_contact_time_ms</code></li><li><code>avg_ground_contact_balance_left_percent</code></li><li><code>avg_vertical_ratio_percent</code></li><li><code>temperature_avg_c</code></li><li><code>temperature_min_c</code></li><li><code>temperature_max_c</code></li><li><code>device_name</code></li><li><code>manufacturer</code></li></ul>
+<p>字段缺失时返回 <code>null</code>，不会伪造数据。</p>
+<h2 id="身体指标">身体指标</h2>
+<p><code>profile</code> 包含：</p>
+<ul><li><code>height_cm</code></li><li><code>age</code></li><li><code>max_heart_rate</code></li><li><code>lactate_threshold_heart_rate</code></li></ul>
+<p><code>current_metrics</code> 和 <code>day_metrics</code> 包含：</p>
+<ul><li><code>date</code></li><li><code>max_heart_rate</code>（仅 <code>current_metrics</code>，来自 <code>profile.max_heart_rate</code>，用于 HTML Current Metrics 表）</li><li><code>daily_max_heart_rate</code></li><li><code>resting_heart_rate</code></li><li><code>resting_heart_rate_7d_avg</code></li><li><code>hrv</code></li><li><code>hrv_7d_avg</code></li><li><code>weight_kg</code></li><li><code>vo2max</code></li><li><code>vo2max_precise</code></li><li><code>sleep</code></li></ul>
+<p><code>current_metrics.sleep</code> 默认是最近 7 天精简睡眠摘要，不包含 Garmin 原始睡眠响应。可用 <code>--sleep-days</code> 调整天数：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --sleep-days 14 --json</code></pre>
+<p>结构：</p>
+<ul><li><code>sleep.days</code>：统计天数</li><li><code>sleep.items[]</code>：每天一条精简睡眠数据</li><li><code>sleep.summary</code>：平均睡眠分、平均总睡眠时长、深睡/浅睡/REM/清醒均值和缺失天数</li></ul>
+<p><code>day_metrics.sleep</code> 是单日精简睡眠摘要，字段包括：</p>
+<ul><li><code>date</code></li><li><code>sleep_score</code></li><li><code>total_sleep_seconds</code> / <code>total_sleep_hours</code></li><li><code>deep_sleep_seconds</code></li><li><code>light_sleep_seconds</code></li><li><code>rem_sleep_seconds</code></li><li><code>awake_seconds</code></li><li><code>sleep_start</code> / <code>sleep_end</code></li><li><code>missing</code></li></ul>
+<p><code>base</code> 不会输出 <code>sleepLevelsMap</code>、<code>sleepMovement</code>、<code>respiration</code>、<code>hrvReadings</code>、原始 sleep response 或完整 <code>sleepScores</code> 对象。如需原始睡眠数据，后续可以新增 <code>sleep --raw</code> 命令；当前版本不实现 raw 命令。</p>
+<p>最大心率有三种不同语义：</p>
+<ul><li><code>profile.max_heart_rate</code>：个人最大心率设置，优先来自 Garmin 设备/设备设置接口，拿不到时可从 <code>~/.garmin-ai/config.json</code> 的 <code>max_heart_rate</code> 读取。</li><li><code>current_metrics.max_heart_rate</code>：同一个人最大心率值，会同步显示在 base 和 compact HTML 的 Current Metrics 表中。</li><li><code>current_metrics.daily_max_heart_rate</code> / <code>day_metrics.daily_max_heart_rate</code>：当天全天最高心率，来自每日心率或 summary 数据。</li><li><code>current_metrics.resting_heart_rate_7d_avg</code> / <code>current_metrics.hrv_7d_avg</code>：最近 7 天静息心率和 HRV 均值，会显示在 base 和 compact HTML 的 Current Metrics 表中。</li><li><code>activity.summary.max_hr</code>：某次活动中的最高心率。</li></ul>
+<p>本地配置个人最大心率：</p>
+<pre><code class="language-bash">uv run garmin-ai config set max-heart-rate 190
+uv run garmin-ai config show</code></pre>
+<p>如果 Garmin 中国区接口没有返回个人最大心率，建议用上面的 <code>config set</code> 命令手动设置一次；后续 <code>base</code> 会自动读取本地配置。</p>
+<p><code>vo2max</code> 是 Garmin 展示值，优先来自用户资料中的 <code>userData.vo2MaxRunning</code>。<code>vo2max_precise</code> 是更精确的 VO2max 值，优先来自 <code>max_metrics[0].generic.vo2MaxPreciseValue</code>，更适合做趋势分析。如果只取到 <code>vo2max_precise</code>，<code>vo2max</code> 会使用其四舍五入值；如果只取到 <code>vo2max</code>，<code>vo2max_precise</code> 保持 <code>null</code>。</p>
+<h2 id="错误输出">错误输出</h2>
+<p>错误也会 JSON 化。</p>
+<h3 id="token-缺失或过期">token 缺失或过期</h3>
+<pre><code class="language-json">{
+  &quot;ok&quot;: false,
+  &quot;error_code&quot;: &quot;AUTH_REQUIRED&quot;,
+  &quot;message&quot;: &quot;Garmin token missing or expired. Run: garmin-ai auth&quot;
+}</code></pre>
+<p>处理方式：</p>
+<pre><code class="language-bash">uv run garmin-ai auth</code></pre>
+<h3 id="garmin-限流">Garmin 限流</h3>
+<pre><code class="language-json">{
+  &quot;ok&quot;: false,
+  &quot;error_code&quot;: &quot;GARMIN_RATE_LIMITED&quot;,
+  &quot;message&quot;: &quot;Garmin requests are rate limited. Try again later.&quot;
+}</code></pre>
+<h3 id="fit-下载失败">FIT 下载失败</h3>
+<pre><code class="language-json">{
+  &quot;ok&quot;: false,
+  &quot;error_code&quot;: &quot;FIT_DOWNLOAD_ERROR&quot;,
+  &quot;message&quot;: &quot;...&quot;
+}</code></pre>
+<h3 id="fit-解析失败">FIT 解析失败</h3>
+<pre><code class="language-json">{
+  &quot;ok&quot;: false,
+  &quot;error_code&quot;: &quot;FIT_PARSE_ERROR&quot;,
+  &quot;message&quot;: &quot;...&quot;
+}</code></pre>
+<h3 id="未知错误">未知错误</h3>
+<pre><code class="language-json">{
+  &quot;ok&quot;: false,
+  &quot;error_code&quot;: &quot;UNKNOWN_ERROR&quot;,
+  &quot;message&quot;: &quot;...&quot;
+}</code></pre>
+<h2 id="dataquality">data_quality</h2>
+<p>Garmin 字段和接口在不同账号、设备、地区、运动类型下可能不一致。</p>
+<p>本项目原则是：</p>
+<ul><li>字段不确定就返回 <code>null</code></li><li>接口失败就保留其他可用数据</li><li>单个字段失败不导致整个 <code>base</code> 命令失败</li><li>失败和缺失写入 <code>data_quality</code></li></ul>
+<p>示例：</p>
+<pre><code class="language-json">{
+  &quot;data_quality&quot;: {
+    &quot;connect_splits&quot;: {
+      &quot;status&quot;: &quot;partial&quot;,
+      &quot;errors&quot;: {
+        &quot;typed_splits&quot;: &quot;...&quot;
+      }
+    },
+    &quot;fit_download&quot;: {
+      &quot;status&quot;: &quot;error&quot;,
+      &quot;message&quot;: &quot;...&quot;
+    }
+  }
+}</code></pre>
+<h2 id="html-导出">HTML 导出</h2>
+<p>html 模式会生成：</p>
+<pre><code class="language-text">data/exports/html/&lt;run_id&gt;/index.html
+data/exports/html/&lt;run_id&gt;/&lt;activity_id&gt;/index.html
+data/exports/html/&lt;run_id&gt;/&lt;activity_id&gt;/charts.html</code></pre>
+<p>full 模式会为每条活动生成：</p>
+<pre><code class="language-text">charts.html</code></pre>
+<p>第一版包含：</p>
+<ul><li>心率 + 配速图</li><li>步频 + 功率图</li><li>海拔图</li><li>GPS 轨迹图，如果有 GPS 数据</li><li>每公里 <code>km_splits</code> 表</li></ul>
+<p>可以直接在浏览器打开：</p>
+<pre><code class="language-text">data/exports/latest/&lt;run_id&gt;/&lt;activity_id&gt;/charts.html</code></pre>
+<p>也可以打开总入口：</p>
+<pre><code class="language-text">data/exports/latest/&lt;run_id&gt;/index.html</code></pre>
+<h2 id="给-ai-分析时的建议">给 AI 分析时的建议</h2>
+<p>优先把 <code>base</code> JSON 作为上下文：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 1 --json</code></pre>
+<p>分析优先级：</p>
+<ol><li><code>profile</code></li><li><code>current_metrics</code></li><li><code>recent_runs[].summary</code></li><li><code>recent_runs[].day_metrics</code></li><li><code>recent_runs[].km_splits</code></li><li><code>recent_runs[].fit_laps</code></li><li><code>recent_runs[].connect_splits</code></li></ol>
+<p>只想人工查看时，使用 html 模式：</p>
+<pre><code class="language-bash">uv run garmin-ai base --limit 5 --mode html --output ./data/exports/html</code></pre>
+<p>只有需要逐秒或逐点分析时，再使用 full 模式导出的文件：</p>
+<ul><li><code>records.csv</code></li><li><code>running_dynamics.csv</code></li><li><code>gps.csv</code></li></ul>
+<h2 id="常用命令速查">常用命令速查</h2>
+<pre><code class="language-bash"># 安装依赖
+uv sync
+
+# 登录并保存 token
+uv run garmin-ai auth
+
+# 最近 1 条跑步，JSON 输出
+uv run garmin-ai base
+
+# 最近 5 条跑步
+uv run garmin-ai base --limit 5
+
+# 最近 1 条跑步，并返回最近 7 天精简睡眠摘要
+uv run garmin-ai base --limit 1 --sleep-days 7 --json
+
+# 保存基础 JSON 到文件
+uv run garmin-ai base --limit 1 --output ./data/exports/base_context.json
+
+# 导出基础 CSV/JSON 到目录
+uv run garmin-ai base --limit 1 --output ./data/exports/base
+
+# html 模式导出浏览器报告
+uv run garmin-ai base --limit 5 --mode html --output ./data/exports/html
+
+# 按时间轴生成 HTML 图表
+uv run garmin-ai base --limit 5 --mode html --chart-x time --output ./data/exports/html
+
+# full 模式导出 FIT、CSV、Parquet、HTML
+uv run garmin-ai base --limit 1 --mode full --output ./data/exports/latest
+
+# 不使用 FIT 缓存，重新下载
+uv run garmin-ai base --limit 1 --no-cache</code></pre>
+<h2 id="git-忽略">Git 忽略</h2>
+<p>以下内容不应提交：</p>
+<ul><li><code>.venv/</code></li><li><code>.env</code></li><li><code>data/fit/</code></li><li><code>data/cache/</code></li><li><code>data/exports/</code></li><li><code>.garminconnect/</code></li><li><code>*.fit</code></li><li><code>*.parquet</code></li></ul>
+<p>Garmin token 默认在用户目录：</p>
+<pre><code class="language-text">~/.garminconnect</code></pre>
+<p>它不在项目目录内，也不应提交到 Git。</p>
+  </main>
+</body>
+</html>

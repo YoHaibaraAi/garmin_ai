@@ -1,0 +1,26 @@
+[project]
+name = "garmin-ai"
+version = "0.1.0"
+description = "Local Garmin Connect CLI for AI-friendly running analysis"
+readme = "README.md"
+authors = [
+    { name = "YoHaibaraAi" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "curl-cffi>=0.15.0",
+    "garmin-fit-sdk>=21.205.0",
+    "garminconnect @ git+https://github.com/cyberjunky/python-garminconnect@v0.3.4 ; python_version >= '3.12'",
+    "pandas>=3.0.3",
+    "plotly>=6.7.0",
+    "pyarrow>=24.0.0",
+    "rich>=15.0.0",
+    "typer>=0.26.3",
+]
+
+[project.scripts]
+garmin-ai = "garmin_ai.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.9.22,<0.10.0"]
+build-backend = "uv_build"
