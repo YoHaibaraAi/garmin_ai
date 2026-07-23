@@ -1,0 +1,4 @@
+interface:
+  display_name: "Garmin Running Analysis"
+  short_description: "Analyze local Garmin runs, recovery, and FIT exports"
+  default_prompt: "Use $garmin-running-analysis to export and analyze my latest run in compact HTML mode."

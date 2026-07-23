@@ -20,6 +20,18 @@
 
 ```text
 garmin-ai/
+├── .agents/
+│   └── skills/
+│       └── garmin-running-analysis -> ../../.claude/skills/garmin-running-analysis
+├── .claude/
+│   └── skills/
+│       └── garmin-running-analysis/
+│           ├── SKILL.md
+│           ├── agents/
+│           │   └── openai.yaml
+│           ├── references/
+│           └── scripts/
+│               └── garmin_ai.py
 ├── pyproject.toml
 ├── README.md
 ├── data/
@@ -40,9 +52,6 @@ garmin-ai/
 │       ├── chart_builder.py
 │       ├── utils.py
 │       └── models.py
-└── skills/
-    └── garmin-running-analysis/
-        └── SKILL.md
 ```
 
 实际代码采用 `src` layout，CLI 入口是：
@@ -71,9 +80,18 @@ garmin-ai = "garmin_ai.cli:app"
 - `pyarrow`
 - `plotly`
 
-## 安装/初始化
+`.claude/skills/garmin-running-analysis/` 是 Skill 的唯一源码目录，也是 Claude Code 的项目级发现入口。`.agents/skills/garmin-running-analysis` 是 Codex 的项目级发现入口，它使用相对符号链接指向同一份 Skill，避免维护两份内容。
 
-在项目根目录运行：
+## 下载和初始化
+
+克隆代码并进入项目：
+
+```bash
+git clone https://github.com/YoHaibaraAi/garmin_ai.git
+cd garmin_ai
+```
+
+安装 [`uv`](https://docs.astral.sh/uv/) 后同步项目依赖：
 
 ```bash
 uv sync
@@ -93,7 +111,7 @@ uv run garmin-ai base --help
 
 ## 认证
 
-首次使用前运行：
+下载代码并完成 `uv sync` 后，在本机交互式终端运行：
 
 ```bash
 uv run garmin-ai auth
@@ -106,7 +124,7 @@ Garmin email:
 Garmin password:
 ```
 
-如果 Garmin 账号开启了两步验证，登录流程会继续提示输入验证码。
+如果 Garmin 账号开启了两步验证，登录流程会继续提示输入 MFA 验证码。邮箱、密码和验证码只应在本机终端输入，不要写入提示词、`.env`、配置文件或代码。
 
 认证成功后，token 会保存到：
 
@@ -119,6 +137,75 @@ Garmin password:
 项目不会保存账号密码，也不会要求把账号密码写入 `.env`、配置文件或代码。
 
 普通查询命令不会交互式输入验证码。只有 `garmin-ai auth` 负责登录、两步验证和 token 初始化。
+
+可以运行以下命令验证认证和默认报告是否可用：
+
+```bash
+uv run garmin-ai base --limit 1 --mode compact --compact-format html --output ./data/exports/compact
+```
+
+如果返回 `AUTH_REQUIRED`，重新运行 `uv run garmin-ai auth`。
+
+## 在 Codex 中使用 Skill
+
+仓库已经通过 `.agents/skills/garmin-running-analysis` 提供项目级 Skill，不需要复制到用户目录。
+
+1. 在 Codex App 中打开本项目文件夹，或在项目根目录启动 Codex CLI。
+2. 输入 `$` 选择 `garmin-running-analysis`，或在 CLI/IDE 中使用 `/skills` 查看。
+3. 显式调用：
+
+   ```text
+   $garmin-running-analysis 分析我最近一次跑步
+   ```
+
+4. 指定最近 N 条：
+
+   ```text
+   $garmin-running-analysis 分析最近 5 条跑步，对比配速、心率和恢复情况
+   ```
+
+也可以直接说“分析我最近一次 Garmin 跑步”，Codex 会根据 Skill 的 `description` 自动选择它。如果 Skill 没有出现在列表中，关闭后重新打开项目或重启 Codex。
+
+## 在 Claude Code 中使用 Skill
+
+仓库已经通过真实目录 `.claude/skills/garmin-running-analysis` 提供项目级 Skill。
+
+在项目根目录启动 Claude Code：
+
+```bash
+claude
+```
+
+首次打开项目时，先检查仓库内容并确认 workspace trust。然后显式调用：
+
+```text
+/garmin-running-analysis 分析我最近一次跑步
+```
+
+指定最近 N 条：
+
+```text
+/garmin-running-analysis 分析最近 5 条跑步，对比配速、心率和恢复情况
+```
+
+Claude Code 也可以根据 Skill 描述自动调用；例如直接输入“分析我最近一次 Garmin 跑步”。如果克隆后本次会话没有发现新建的 `.claude/skills` 顶层目录，重启 Claude Code。
+
+## Skill 默认行为
+
+Codex 和 Claude Code 调用的是同一份 `.claude/skills/garmin-running-analysis/SKILL.md`。未指定数量时默认获取最近 1 条跑步，并执行：
+
+```bash
+uv run garmin-ai base --limit 1 --mode compact --compact-format html --output ./data/exports/compact
+```
+
+`--limit N` 表示最近 N 条跑步活动，不是最近 N 天。目录型结果写入：
+
+```text
+data/exports/compact/<run_id>/index.html
+data/exports/compact/<run_id>.zip
+```
+
+Skill 默认使用 compact HTML；只有明确要求 FIT Lap、固定公里分段、详细图表、逐点数据或 GPS 时，才切换到 basic、html 或 full 模式。
 
 ## 基础用法
 
