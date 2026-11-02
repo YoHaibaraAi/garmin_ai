@@ -135,7 +135,7 @@
 <pre><code class="language-toml">[project.scripts]
 garmin-ai = &quot;garmin_ai.cli:app&quot;</code></pre>
 <h2 id="环境要求">环境要求</h2>
-<ul><li>Python 3.12 推荐</li><li>项目声明 Python <code>&gt;=3.11</code></li><li>当前使用 GitHub <code>cyberjunky/python-garminconnect</code> 的 <code>v0.3.4</code> tag，因为该版本修复了中国区账号 DI OAuth2 token 刷新走 <code>diauth.garmin.cn</code> 的问题</li><li><code>garminconnect</code> 当前包元数据要求 Python <code>&gt;=3.12</code>，所以实际使用建议用 Python 3.12</li><li>使用 <code>uv</code> 管理依赖和运行命令</li></ul>
+<ul><li>Python 3.12 推荐</li><li>项目声明 Python <code>&gt;=3.11</code></li><li>当前使用 GitHub <code>cyberjunky/python-garminconnect</code> 的 <code>0.3.20</code> tag，包含中国区 DI OAuth2 token 刷新支持及后续登录、MFA 和错误处理修复</li><li><code>garminconnect</code> 当前包元数据要求 Python <code>&gt;=3.12</code>，所以实际使用建议用 Python 3.12</li><li>使用 <code>uv</code> 管理依赖和运行命令</li></ul>
 <p>依赖包括：</p>
 <ul><li><code>garminconnect</code></li><li><code>curl_cffi</code></li><li><code>garmin-fit-sdk</code></li><li><code>typer</code></li><li><code>rich</code></li><li><code>pandas</code></li><li><code>pyarrow</code></li><li><code>plotly</code></li></ul>
 <h2 id="安装-初始化">安装/初始化</h2>

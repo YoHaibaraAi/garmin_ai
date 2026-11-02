@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "curl-cffi>=0.15.0",
     "garmin-fit-sdk>=21.205.0",
-    "garminconnect @ git+https://github.com/cyberjunky/python-garminconnect@v0.3.4 ; python_version >= '3.12'",
+    "garminconnect @ git+https://github.com/cyberjunky/python-garminconnect@0.3.20 ; python_version >= '3.12'",
     "pandas>=3.0.3",
     "plotly>=6.7.0",
     "pyarrow>=24.0.0",

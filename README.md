@@ -65,7 +65,7 @@ garmin-ai = "garmin_ai.cli:app"
 
 - Python 3.12 推荐
 - 项目声明 Python `>=3.11`
-- 当前使用 GitHub `cyberjunky/python-garminconnect` 的 `v0.3.4` tag，因为该版本修复了中国区账号 DI OAuth2 token 刷新走 `diauth.garmin.cn` 的问题
+- 当前使用 GitHub `cyberjunky/python-garminconnect` 的 `0.3.20` tag，包含中国区 DI OAuth2 token 刷新支持及后续登录、MFA 和错误处理修复
 - `garminconnect` 当前包元数据要求 Python `>=3.12`，所以实际使用建议用 Python 3.12
 - 使用 `uv` 管理依赖和运行命令
 
@@ -124,7 +124,27 @@ Garmin email:
 Garmin password:
 ```
 
-如果 Garmin 账号开启了两步验证，登录流程会继续提示输入 MFA 验证码。邮箱、密码和验证码只应在本机终端输入，不要写入提示词、`.env`、配置文件或代码。
+也可以在本地配置文件 `~/.garmin-ai/config.json` 中保存账号和密码：
+
+```json
+{
+  "email": "your-garmin-email@example.com",
+  "password": "your-garmin-password"
+}
+```
+
+再次执行 `uv run garmin-ai auth` 时会自动读取这两个字段，不再提示输入；如果只配置了其中一个字段，命令只提示缺少的字段。保存配置时，CLI 会将文件权限设为仅当前用户可读写（`0600`）。`uv run garmin-ai config show` 和 `config set password` 的输出会对密码打码。
+
+也可以通过配置命令写入：
+
+```bash
+uv run garmin-ai config set email your-garmin-email@example.com
+uv run garmin-ai config set password
+```
+
+第二条命令会隐藏式提示输入密码，避免密码进入 shell 历史。密码仍会以明文保存在本机配置文件中，因此仅应在可信的个人设备上使用此方式。更注重安全时，不要配置 `password`，让 `auth` 命令继续以隐藏输入方式提示密码。
+
+如果 Garmin 账号开启了两步验证，登录流程会继续提示输入 MFA 验证码。邮箱、密码和验证码都不应写入提示词、`.env` 或代码；MFA 验证码不会从配置文件读取或保存。
 
 认证成功后，token 会保存到：
 
@@ -134,9 +154,19 @@ Garmin password:
 
 当前默认登录 Garmin 中国区账号。代码中创建 Garmin 客户端时使用 `is_cn=True`，所以 `auth` 和后续 `base` 查询都会走国内账号环境。
 
-项目不会保存账号密码，也不会要求把账号密码写入 `.env`、配置文件或代码。
+除非用户主动在 `~/.garmin-ai/config.json` 中配置，否则项目不会保存账号密码。
 
 普通查询命令不会交互式输入验证码。只有 `garmin-ai auth` 负责登录、两步验证和 token 初始化。
+
+访问 token 过期后，普通查询会使用本地保存的刷新凭证自动续期，并完整保存更新后的 token。访问 token 到期本身不需要重新输入密码或验证码；刷新凭证或浏览器会话失效时，才需要重新运行 `uv run garmin-ai auth`。
+
+为避免 macOS 系统代理或本地 HTTPS 检查代理替换 Garmin 的 TLS 证书，CLI 默认让 Garmin 的 Requests 会话直连，不读取系统代理配置。如果网络环境必须通过已正确安装 CA 证书的系统代理访问 Garmin，可以显式启用：
+
+```bash
+GARMIN_AI_TRUST_ENV=1 uv run garmin-ai base
+```
+
+不要通过 `verify=False` 关闭 TLS 证书校验。
 
 可以运行以下命令验证认证和默认报告是否可用：
 

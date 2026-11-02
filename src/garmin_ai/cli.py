@@ -14,7 +14,7 @@ from rich.console import Console
 from .auth import login_interactive
 from . import garmin_client
 from .chart_builder import build_activity_charts
-from .config import CONFIG_PATH, load_config, set_config_value
+from .config import CONFIG_PATH, load_config, redact_config, set_config_value
 from .errors import AuthRequiredError, FitDownloadError, FitParseError, GarminAIError
 from .exporter import (
     compact_base_context,
@@ -64,8 +64,19 @@ def auth() -> None:
     """Login to Garmin Connect and initialize the token store."""
 
     try:
-        email = typer.prompt("Garmin email")
-        password = typer.prompt("Garmin password", hide_input=True)
+        local_config = load_config()
+        configured_email = local_config.get("email")
+        configured_password = local_config.get("password")
+        email = (
+            configured_email.strip()
+            if isinstance(configured_email, str) and configured_email.strip()
+            else typer.prompt("Garmin email")
+        )
+        password = (
+            configured_password
+            if isinstance(configured_password, str) and configured_password
+            else typer.prompt("Garmin password", hide_input=True)
+        )
         login_interactive(email, password, TOKEN_DIR, prompt_mfa=lambda: typer.prompt("Garmin MFA code"))
         console.print("Garmin China token saved to ~/.garminconnect")
     except Exception as exc:  # noqa: BLE001
@@ -163,22 +174,36 @@ def debug_metrics(
 def config_show() -> None:
     """Show local garmin-ai config."""
 
-    console.print_json(json.dumps(json_safe({"config_path": CONFIG_PATH, "config": load_config()}), ensure_ascii=False))
+    console.print_json(
+        json.dumps(
+            json_safe({"config_path": CONFIG_PATH, "config": redact_config(load_config())}),
+            ensure_ascii=False,
+        )
+    )
 
 
 @config_app.command("set")
-def config_set(key: str = typer.Argument(...), value: str = typer.Argument(...)) -> None:
+def config_set(
+    key: str = typer.Argument(...),
+    value: str | None = typer.Argument(None),
+) -> None:
     """Set a local config value."""
 
     normalized_key = key.replace("-", "_")
+    if value is None:
+        if normalized_key == "password":
+            value = typer.prompt("Garmin password", hide_input=True)
+        else:
+            raise typer.BadParameter("Missing argument 'VALUE'.")
     parsed: Any = value
     if normalized_key == "max_heart_rate":
         parsed_float = float(value)
         parsed = int(parsed_float) if parsed_float.is_integer() else parsed_float
     path = set_config_value(normalized_key, parsed)
+    printable_value = "********" if normalized_key == "password" and parsed else parsed
     console.print_json(
         json.dumps(
-            json_safe({"ok": True, "config_path": path, "key": normalized_key, "value": parsed}),
+            json_safe({"ok": True, "config_path": path, "key": normalized_key, "value": printable_value}),
             ensure_ascii=False,
         )
     )

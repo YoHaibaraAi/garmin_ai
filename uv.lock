@@ -251,7 +251,7 @@ dependencies = [
 requires-dist = [
     { name = "curl-cffi", specifier = ">=0.15.0" },
     { name = "garmin-fit-sdk", specifier = ">=21.205.0" },
-    { name = "garminconnect", marker = "python_full_version >= '3.12'", git = "https://github.com/cyberjunky/python-garminconnect?rev=v0.3.4" },
+    { name = "garminconnect", marker = "python_full_version >= '3.12'", git = "https://github.com/cyberjunky/python-garminconnect?rev=0.3.20" },
     { name = "pandas", specifier = ">=3.0.3" },
     { name = "plotly", specifier = ">=6.7.0" },
     { name = "pyarrow", specifier = ">=24.0.0" },
@@ -270,11 +270,12 @@ wheels = [
 
 [[package]]
 name = "garminconnect"
-version = "0.3.4"
-source = { git = "https://github.com/cyberjunky/python-garminconnect?rev=v0.3.4#d206167c28dbc803b326e17cd5a5c1faa60e53d3" }
+version = "0.3.20"
+source = { git = "https://github.com/cyberjunky/python-garminconnect?rev=0.3.20#3eee7a4db6c2242967aae1780b8839599ea7dcbb" }
 dependencies = [
     { name = "curl-cffi", marker = "python_full_version >= '3.12'" },
     { name = "requests", marker = "python_full_version >= '3.12'" },
+    { name = "tzdata", marker = "python_full_version >= '3.12' and sys_platform == 'win32'" },
     { name = "ua-generator", marker = "python_full_version >= '3.12'" },
 ]
 

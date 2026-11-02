@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 import json
+import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
+from .garmin_client import create_client
 from .utils import GARMIN_IS_CN, safe_call
 
 
@@ -18,20 +21,23 @@ def login_interactive(
 ) -> None:
     """Login to Garmin Connect and save tokens to the token directory."""
 
-    from garminconnect import Garmin
-
     token_dir.mkdir(parents=True, exist_ok=True)
-    client = Garmin(email=email, password=password, is_cn=GARMIN_IS_CN, prompt_mfa=prompt_mfa)
+    client = create_client(email=email, password=password, prompt_mfa=prompt_mfa)
     if GARMIN_IS_CN:
         _disable_mobile_login_for_cn(client)
-    result = safe_call(client.login, str(token_dir))
-    if result.ok:
-        _save_extended_tokens(client, token_dir)
-        return
-    if _save_extended_tokens(client, token_dir):
-        return
+    # ``Garmin.login(tokenstore=...)`` loads an existing token before trying
+    # the supplied credentials.  Authentication is an explicit fresh-login
+    # command, so do not let an old token short-circuit it.
+    tokenstore = os.environ.pop("GARMINTOKENS", None)
+    try:
+        result = safe_call(client.login)
+    finally:
+        if tokenstore is not None:
+            os.environ["GARMINTOKENS"] = tokenstore
     if not result.ok:
         raise RuntimeError(result.error or "Garmin login failed")
+    if not _save_extended_tokens(client, token_dir):
+        raise RuntimeError("Garmin login succeeded but no usable token was returned")
 
 
 def _disable_mobile_login_for_cn(garmin: object) -> None:
@@ -87,7 +93,16 @@ def _save_extended_tokens(garmin: object, token_dir: Path) -> bool:
         return False
 
     token_dir.mkdir(parents=True, exist_ok=True)
-    (token_dir / "garmin_ai_tokens.json").write_text(json.dumps(token_data), encoding="utf-8")
+    token_path = token_dir / "garmin_ai_tokens.json"
+    # Replace atomically so an interrupted write cannot truncate the token store.
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=token_dir, delete=False) as handle:
+        temporary_path = Path(handle.name)
+        try:
+            json.dump(token_data, handle)
+            handle.close()
+            os.replace(temporary_path, token_path)
+        finally:
+            temporary_path.unlink(missing_ok=True)
     return True
 
 
@@ -97,7 +112,7 @@ def _serialize_cookies(client: Any) -> list[dict[str, Any]]:
     cookies: list[dict[str, Any]] = []
     session = getattr(client, "cs", None)
     jar = getattr(session, "cookies", None)
-    for cookie in getattr(jar, "jar", []):
+    for cookie in getattr(jar, "jar", jar if jar is not None else []):
         cookies.append(
             {
                 "name": cookie.name,
@@ -118,4 +133,12 @@ def _cookie_header(client: Any) -> str | None:
     if not cookies:
         jwt_web = getattr(client, "jwt_web", None)
         return f"JWT_WEB={jwt_web}" if jwt_web else None
-    return "; ".join(f"{cookie['name']}={cookie['value']}" for cookie in cookies)
+    jwt_web = getattr(client, "jwt_web", None)
+    values = [
+        f"{cookie['name']}={cookie['value']}"
+        for cookie in cookies
+        if not jwt_web or cookie["name"] != "JWT_WEB"
+    ]
+    if jwt_web:
+        values.append(f"JWT_WEB={jwt_web}")
+    return "; ".join(values)

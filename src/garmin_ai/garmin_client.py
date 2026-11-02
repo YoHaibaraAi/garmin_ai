@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import base64
 import json
+import os
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from .errors import AuthRequiredError
 from .utils import GARMIN_IS_CN, SafeResult, extract_weight_value, find_first_number_by_keys, safe_call, today_str
 
 _VO2_KEYS = [
@@ -21,29 +25,69 @@ _VO2_KEYS = [
 ]
 
 
-def create_client() -> Any:
+def create_client(**kwargs: Any) -> Any:
     """Create a Garmin client without doing network work at import time."""
 
     from garminconnect import Garmin
 
-    return Garmin(is_cn=GARMIN_IS_CN)
+    garmin = Garmin(is_cn=GARMIN_IS_CN, **kwargs)
+    _configure_requests_sessions(garmin)
+    return garmin
+
+
+def _configure_requests_sessions(garmin: Any) -> None:
+    """Keep local OS proxies from intercepting Garmin TLS by default.
+
+    Requests reads macOS System Configuration proxies when ``trust_env`` is
+    enabled, even when no HTTP(S)_PROXY environment variable is present. A
+    local HTTPS inspection proxy can then replace Garmin's valid certificate
+    with an untrusted self-signed certificate. Users who intentionally require
+    their system proxy can opt back in with ``GARMIN_AI_TRUST_ENV=1``.
+    """
+
+    trust_env = os.getenv("GARMIN_AI_TRUST_ENV", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    client = getattr(garmin, "client", None)
+    if client is None:
+        return
+    for session_name in ("cs", "_api_session"):
+        session = getattr(client, session_name, None)
+        if session is not None and hasattr(session, "trust_env"):
+            session.trust_env = trust_env
 
 
 def login_with_token(token_dir: Path) -> Any:
     """Authenticate using the local Garmin token store."""
 
     client = create_client()
-    if _load_extended_tokens(client, token_dir):
-        return client
+    extended_token_path = token_dir / "garmin_ai_tokens.json"
+    if extended_token_path.exists():
+        if _load_extended_tokens(client, token_dir):
+            return client
+        raise AuthRequiredError(
+            "Garmin token is missing, expired, or profile validation failed. "
+            "Run: garmin-ai auth"
+        )
 
     result = safe_call(client.login, str(token_dir))
-    if not result.ok:
-        raise RuntimeError(result.error or "Garmin token login failed")
+    if (
+        not result.ok
+        or not _has_valid_expiry(_active_auth_token(client))
+        or not has_display_name(client)
+    ):
+        raise AuthRequiredError(
+            "Garmin token is missing, expired, or profile validation failed. "
+            "Run: garmin-ai auth"
+        )
     return client
 
 
 def _load_extended_tokens(garmin: Any, token_dir: Path) -> bool:
-    """Load garmin-ai extended token state without fetching profile eagerly."""
+    """Load and validate garmin-ai extended token state."""
 
     token_path = token_dir / "garmin_ai_tokens.json"
     if not token_path.exists():
@@ -52,21 +96,77 @@ def _load_extended_tokens(garmin: Any, token_dir: Path) -> bool:
         data = json.loads(token_path.read_text(encoding="utf-8"))
         if data.get("is_cn") != GARMIN_IS_CN:
             return False
+        di_token = data.get("di_token")
+        jwt_web = data.get("jwt_web")
+        active_token = di_token or jwt_web
+        if not isinstance(active_token, str) or not active_token:
+            return False
         client = garmin.client
-        client.di_token = data.get("di_token")
+        client.di_token = di_token
         client.di_refresh_token = data.get("di_refresh_token")
         client.di_client_id = data.get("di_client_id")
-        client.jwt_web = data.get("jwt_web")
+        client.jwt_web = jwt_web
         client.csrf_token = data.get("csrf_token")
-        client._tokenstore_path = str(token_path)
         _restore_cookies(client, data)
         _patch_cookie_header(client, data.get("cookie_header"))
-        if client.di_token or client.jwt_web:
-            _hydrate_profile(garmin)
-            return True
-        return False
+        _configure_token_persistence(garmin, token_dir)
+        if not _has_valid_expiry(active_token):
+            # Access-token expiry is recoverable while refresh credentials or
+            # a saved browser session remain usable. Never prompt for MFA here.
+            can_refresh = (
+                bool(client.di_refresh_token and client.di_client_id)
+                if di_token
+                else bool(data.get("cookies"))
+            )
+            if not can_refresh:
+                return False
+            result = safe_call(client._refresh_session)
+            if not result.ok or not _has_valid_expiry(_active_auth_token(garmin)):
+                return False
+        if not _hydrate_profile(garmin) or not _has_valid_expiry(_active_auth_token(garmin)):
+            return False
+        client.dump(str(token_path))
+        return True
     except Exception:
         return False
+
+
+def _configure_token_persistence(garmin: Any, token_dir: Path) -> None:
+    """Keep upstream refreshes from overwriting our extended token schema."""
+
+    # Imported here because interactive auth uses create_client from this module.
+    from .auth import _save_extended_tokens
+
+    def dump_extended_tokens(_path: str) -> None:
+        if not _save_extended_tokens(garmin, token_dir):
+            raise RuntimeError("No usable Garmin token to save")
+
+    garmin.client.dump = dump_extended_tokens
+    garmin.client._tokenstore_path = str(token_dir / "garmin_ai_tokens.json")
+
+
+def _has_valid_expiry(token: Any) -> bool:
+    """Return whether a JWT token has a parseable, future expiration time."""
+
+    if not isinstance(token, str) or not token:
+        return False
+    parts = token.split(".")
+    if len(parts) < 2:
+        return False
+    try:
+        encoded_payload = parts[1] + "=" * (-len(parts[1]) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(encoded_payload).decode())
+        expires_at = float(payload["exp"])
+    except Exception:
+        return False
+    return expires_at > time.time()
+
+
+def _active_auth_token(garmin: Any) -> Any:
+    """Return the token the Garmin client will use for API requests."""
+
+    client = getattr(garmin, "client", None)
+    return getattr(client, "di_token", None) or getattr(client, "jwt_web", None)
 
 
 def _restore_cookies(client: Any, data: dict[str, Any]) -> None:
@@ -102,25 +202,40 @@ def _patch_cookie_header(client: Any, cookie_header: Any) -> None:
     def get_api_headers_with_saved_cookies() -> dict[str, str]:
         headers = original_get_api_headers()
         if getattr(client, "jwt_web", None) and not getattr(client, "di_token", None):
-            headers["Cookie"] = cookie_header
+            # Keep other browser cookies, but use the current JWT after refresh.
+            from .auth import _cookie_header
+
+            cookies: dict[str, str] = {}
+            for source in (cookie_header, _cookie_header(client) or ""):
+                for item in source.split(";"):
+                    name, separator, value = item.strip().partition("=")
+                    if name and separator:
+                        cookies[name] = value
+            cookies["JWT_WEB"] = client.jwt_web
+            headers["Cookie"] = "; ".join(f"{name}={value}" for name, value in cookies.items())
         return headers
 
     client.get_api_headers = get_api_headers_with_saved_cookies
 
 
-def _hydrate_profile(garmin: Any) -> None:
-    """Best-effort profile hydration after token-only login."""
+def _hydrate_profile(garmin: Any) -> bool:
+    """Hydrate and validate the profile after token-only login."""
 
     profile_result = safe_call(garmin.client.connectapi, "/userprofile-service/socialProfile")
-    if profile_result.ok and isinstance(profile_result.value, dict):
-        garmin.display_name = profile_result.value.get("displayName") or garmin.display_name
-        garmin.full_name = profile_result.value.get("fullName") or garmin.full_name
+    if not profile_result.ok or not isinstance(profile_result.value, dict):
+        return False
+    display_name = profile_result.value.get("displayName")
+    if not display_name:
+        return False
+    garmin.display_name = display_name
+    garmin.full_name = profile_result.value.get("fullName") or garmin.full_name
 
     settings_result = safe_call(garmin.client.connectapi, garmin.garmin_connect_user_settings_url)
     if settings_result.ok and isinstance(settings_result.value, dict):
         user_data = settings_result.value.get("userData")
         if isinstance(user_data, dict):
             garmin.unit_system = user_data.get("measurementSystem") or garmin.unit_system
+    return True
 
 
 def has_display_name(client: Any) -> bool:
